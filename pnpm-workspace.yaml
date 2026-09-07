@@ -1,0 +1,14 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "services/*"
+ignoredBuiltDependencies:
+  - '@prisma/client'
+  - bcrypt
+  - esbuild
+  - prisma
+
+onlyBuiltDependencies:
+  - '@prisma/engines'
+  - sharp
+  - unrs-resolver

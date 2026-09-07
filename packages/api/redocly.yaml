@@ -1,0 +1,19 @@
+# Lint policy. Every rule below its default says why — a warning nobody
+# intends to act on trains the team to ignore the whole output.
+
+extends:
+  - recommended
+
+rules:
+  # The local server entry is what the mobile and web clients point at
+  # during development, and what Prism serves.
+  no-server-example.com: off
+
+  # Left on deliberately. Several list endpoints describe only their 200
+  # while being perfectly able to return 401 and 403. Work through them.
+  operation-4xx-response: warn
+
+  # Client generators derive method names from these.
+  operation-operationId: error
+  operation-summary: error
+  security-defined: error

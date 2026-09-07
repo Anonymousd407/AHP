@@ -1,0 +1,27 @@
+{
+  "name": "@a-health/notification",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc --noEmit",
+    "start": "node --import tsx src/index.ts",
+    "test": "node --import tsx --test src/tests/*.test.ts"
+  },
+  "dependencies": {
+    "@a-health/database": "workspace:*",
+    "@a-health/http": "workspace:*",
+    "@a-health/logger": "workspace:*",
+    "dotenv": "^17.4.2",
+    "express": "^5.1.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.23.5",
+    "typescript": "^5.9.3"
+  }
+}
