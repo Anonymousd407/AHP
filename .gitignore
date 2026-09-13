@@ -8,3 +8,7 @@ build/
 .next/
 .turbo/
 coverage/
+.playwright-browsers/
+playwright-report/
+test-results/
+*.auth-state.json

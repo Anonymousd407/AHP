@@ -6,6 +6,7 @@ import { serverGet } from '@/lib/serverToken';
 import type { Consultation } from '@/lib/api';
 import { Notice, PageHeader } from '@/components/ui';
 import { MessageThread } from '@/components/MessageThread';
+import { OrderInvestigation } from '@/components/OrderInvestigation';
 import { ReferForOpinion } from '@/components/ReferForOpinion';
 import { urgencyStyle } from '@/lib/urgency';
 import { dateTime } from '@/lib/format';
@@ -62,6 +63,7 @@ export default async function CasePage({ params }: { params: { consultation_id: 
             Rekodi ya mgonjwa
           </Link>
         </div>
+        <OrderInvestigation careThreadId={c.care_thread_id} consultationId={c.id} />
         <ReferForOpinion careThreadId={c.care_thread_id} />
       </div>
     </div>

@@ -158,7 +158,12 @@ describe('refresh token rotation', () => {
   it('revokes the whole family when a used token is presented again', async () => {
     const phone = track(testPhone());
     const first = await registerAndVerify(phone);
+    const user = await prisma.user.findUniqueOrThrow({ where: { phoneNumber: phone } });
     await auth.refreshSession(first.refresh_token, meta);
+    await prisma.refreshToken.updateMany({
+      where: { userId: user.id, usedAt: { not: null } },
+      data: { usedAt: new Date(Date.now() - 11_000) },
+    });
 
     // Replaying the already-rotated token is the signature of a stolen
     // credential. Nothing in that family may survive it.
@@ -167,11 +172,27 @@ describe('refresh token rotation', () => {
       (e: AppError) => e.code === 'TOKEN_REUSE_DETECTED',
     );
 
-    const user = await prisma.user.findUniqueOrThrow({ where: { phoneNumber: phone } });
     const live = await prisma.refreshToken.count({
       where: { userId: user.id, revokedAt: null },
     });
     assert.equal(live, 0, 'every token in the family must be revoked');
+  });
+
+  it('does not revoke a family for a same-moment duplicate refresh', async () => {
+    const phone = track(testPhone());
+    const first = await registerAndVerify(phone);
+    await auth.refreshSession(first.refresh_token, meta);
+
+    await assert.rejects(
+      () => auth.refreshSession(first.refresh_token, meta),
+      (e: AppError) => e.code === 'TOKEN_INVALID',
+    );
+
+    const user = await prisma.user.findUniqueOrThrow({ where: { phoneNumber: phone } });
+    const live = await prisma.refreshToken.count({
+      where: { userId: user.id, revokedAt: null, usedAt: null },
+    });
+    assert.equal(live, 1, 'the replacement token must survive a duplicate in-flight refresh');
   });
 });
 

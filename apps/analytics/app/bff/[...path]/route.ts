@@ -20,10 +20,10 @@ async function forward(req: NextRequest, path: string[]) {
     );
   }
 
-  const token = await tokenFromRequest(req);
-  if (!token) {
+  const auth = await tokenFromRequest(req);
+  if (!auth) {
     return NextResponse.json(
-      { error: { code: 'UNAUTHENTICATED', message: 'Ingia kwanza.' } },
+      { error: { code: 'UNAUTHENTICATED', message: 'Your session has expired. Please sign in again.' } },
       { status: 401 },
     );
   }
@@ -33,7 +33,7 @@ async function forward(req: NextRequest, path: string[]) {
 
   const headers = new Headers({
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${auth.accessToken}`,
   });
   const key = req.headers.get('Idempotency-Key');
   if (key) headers.set('Idempotency-Key', key);
@@ -43,15 +43,17 @@ async function forward(req: NextRequest, path: string[]) {
   try {
     const upstream = await fetch(url, { method: req.method, headers, body, cache: 'no-store' });
     const text = await upstream.text();
-    return new NextResponse(text || null, {
+    const response = new NextResponse(text || null, {
       status: upstream.status,
       headers: { 'Content-Type': upstream.headers.get('Content-Type') ?? 'application/json' },
     });
+    if (auth.cookie) response.cookies.set(auth.cookie.name, auth.cookie.value, auth.cookie.options);
+    return response;
   } catch {
     // A service being down is not the caller's mistake, and saying so stops
     // them retrying a request that cannot succeed.
     return NextResponse.json(
-      { error: { code: 'SERVICE_UNAVAILABLE', message: 'Huduma hii haipatikani kwa sasa.' } },
+      { error: { code: 'SERVICE_UNAVAILABLE', message: 'This service is temporarily unavailable.' } },
       { status: 503 },
     );
   }

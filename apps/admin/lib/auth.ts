@@ -1,5 +1,6 @@
 import type { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { authCookies } from './authCookies';
 import { resolveServiceUrl } from './services';
 
 /**
@@ -44,8 +45,24 @@ async function refreshAccessToken(token: Record<string, unknown>) {
   };
 }
 
+function readAccessClaims(accessToken: string | undefined) {
+  if (!accessToken) return {};
+  try {
+    const payload = accessToken.split('.')[1];
+    if (!payload) return {};
+    return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as {
+      sub?: string;
+      email?: string;
+      role?: string;
+    };
+  } catch {
+    return {};
+  }
+}
+
 export const authOptions: NextAuthOptions = {
   session: { strategy: 'jwt' },
+  cookies: authCookies,
   pages: { signIn: '/login' },
   providers: [
     CredentialsProvider({
@@ -71,12 +88,13 @@ export const authOptions: NextAuthOptions = {
 
         if (!res || !res.ok) return null;
         const data = await res.json();
+        const claims = readAccessClaims(data.access_token);
 
         return {
-          id: data.user?.id ?? 'unknown',
+          id: data.user?.id ?? claims.sub ?? 'unknown',
           name: data.user?.full_name ?? null,
-          email: data.user?.email ?? credentials.email,
-          role: data.user?.role ?? 'clinician',
+          email: data.user?.email ?? claims.email ?? credentials.email,
+          role: data.user?.role ?? claims.role,
           accessToken: data.access_token,
           refreshToken: data.refresh_token,
           accessTokenExpires: Date.now() + (data.expires_in ?? 900) * 1000,
@@ -102,7 +120,7 @@ export const authOptions: NextAuthOptions = {
       // the encrypted JWT and is read server-side only.
       if (session.user) {
         session.user.name = (token.name as string) ?? null;
-        session.user.id = (token.sub as string) ?? undefined;
+        session.user.id = ((token.id as string) ?? (token.sub as string)) ?? undefined;
         session.user.role = token.role as string | undefined;
       }
       return session;
