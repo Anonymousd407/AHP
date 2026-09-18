@@ -1,0 +1,167 @@
+<!doctype html><html><head><meta charset="utf-8"><title>AHP Local Integration Report - 2026-09-12</title><style>
+@page { size: A4; margin: 16mm 13mm; }
+body { font-family: Arial, Helvetica, sans-serif; color: #17202a; font-size: 11px; line-height: 1.42; }
+h1 { font-size: 24px; margin: 0 0 8px; color: #123047; }
+h2 { font-size: 16px; margin: 22px 0 8px; padding-top: 6px; border-top: 1px solid #d9e2ec; color: #123047; }
+p { margin: 5px 0; }
+ul { margin: 5px 0 10px 18px; padding: 0; }
+li { margin: 3px 0; }
+table { width: 100%; border-collapse: collapse; margin: 8px 0 14px; table-layout: fixed; page-break-inside: auto; }
+th, td { border: 1px solid #d6dee8; padding: 5px 6px; vertical-align: top; word-wrap: break-word; }
+th { background: #eef4f8; color: #123047; text-align: left; font-weight: 700; }
+tr { page-break-inside: avoid; }
+code { font-family: Consolas, Menlo, monospace; background: #f3f6f8; padding: 1px 3px; border-radius: 3px; }
+pre { background: #f3f6f8; border: 1px solid #d6dee8; padding: 8px; white-space: pre-wrap; }
+.report-meta { margin: 0 0 14px; color: #52616f; font-size: 10px; }
+.badge { display: inline-block; padding: 2px 6px; border-radius: 999px; background: #e8f5ee; color: #126c43; font-weight: 700; }
+</style></head><body><div class="report-meta">Generated locally on 2026-09-12 from docs/LOCAL-INTEGRATION.md</div><h1>AHP Local Integration Matrix</h1>
+
+<p>Last updated: 2026-09-12.</p>
+
+<p>Local dev database: existing Docker PostgreSQL <code>ahealth-pg</code>, database <code>ahealth_dev</code>.</p>
+<p>Isolated test database: <code>ahealth_test</code> on the same <code>ahealth-pg</code> container.</p>
+<p>Local apps: doctor-admin <code>3100</code>, admin <code>3200</code>, analytics <code>3300</code>.</p>
+
+<p>Private pre-write backup taken before dev DB mutations:</p>
+<p><code>~/ahp-local-backups/ahealth_dev_20260912_133957.dump</code>.</p>
+
+<h2>Checkpoint</h2>
+
+<p>Completed:</p>
+
+<ul>
+<li>PASS: BFF/server auth refresh for doctor-admin, admin and analytics.</li>
+<li>PASS: Same-browser cookie isolation for all three apps.</li>
+<li>PASS: CBC evidence contradiction resolved against exact DB/schema and API.</li>
+<li>PASS: Core synthetic doctor workflow through API persistence/read-back.</li>
+<li>PASS: Admin management actions where fixtures exist.</li>
+<li>PASS: Analytics API reads for current synthetic data.</li>
+<li>PASS: Isolated <code>ahealth_test</code> migrated and auth tests run against it.</li>
+<li>PASS: Firefox browser automation installed and used for real login checks.</li>
+<li>PASS: Safe local lifecycle scripts fixed and verified.</li>
+<li>PASS: Production builds for doctor-admin, admin and analytics.</li>
+<li>PASS: Payment refund API verified against <code>ahealth_test</code>.</li>
+</ul>
+
+<p>Remaining:</p>
+
+<ul>
+<li>MOCKED: external AI, SMS/notification delivery, payment providers and gateway-provider integrations stay local/mock.</li>
+</ul>
+
+<h2>Auth Lifecycle</h2>
+
+<table><thead><tr><th>Case</th><th>Apps</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>Valid session/access token</td><td>doctor-admin, admin, analytics</td><td>PASS</td><td>Firefox visited <code>/queue</code>, <code>/emergency</code>, <code>/surveillance</code> in one browser context; <code>/bff/users/me</code> returned roles <code>clinician</code>, <code>platform_admin</code>, <code>platform_admin</code>.</td></tr>
+<tr><td>Expired access + valid refresh</td><td>doctor-admin, admin, analytics</td><td>PASS</td><td>Synthetic expired NextAuth cookies returned BFF <code>200</code>, emitted a rotated <code>Set-Cookie</code>, and the next BFF call with that replacement cookie returned <code>200</code>.</td></tr>
+<tr><td>Invalid/revoked refresh</td><td>doctor-admin, admin, analytics</td><td>PASS</td><td>Expired cookie with invalid refresh returned <code>401</code> and English message <code>Your session has expired. Please sign in again.</code></td></tr>
+<tr><td>Concurrent refresh</td><td>doctor-admin</td><td>PASS</td><td>Two simultaneous <code>/bff/users/me</code> calls with the same expired doctor cookie both returned <code>200</code>, both set replacement cookies, role stayed <code>clinician</code>.</td></tr>
+<tr><td>Three apps in one browser context</td><td>doctor-admin, admin, analytics</td><td>PASS</td><td>Firefox cookie jar held <code>a-health-admin.session-token</code>, <code>a-health-analytics.session-token</code>, <code>a-health-doctor.session-token</code>; no role confusion on BFF reads.</td></tr>
+<tr><td>Password preservation</td><td>login forms</td><td>PASS</td><td>Doctor login no longer trims password before <code>signIn</code>; admin/analytics already preserved password value.</td></tr>
+<tr><td>Real Firefox login forms</td><td>doctor-admin, admin, analytics</td><td>PASS</td><td>Playwright Firefox used real login forms with no injected cookies. Callback responses were <code>200</code> with protected callback URLs <code>/queue</code>, <code>/emergency</code>, <code>/surveillance</code>; refresh preserved roles <code>clinician</code>, <code>platform_admin</code>, <code>platform_admin</code> in one browser context.</td></tr>
+</tbody></table>
+
+<h2>CBC Evidence</h2>
+
+<table><thead><tr><th>Check</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>Running diagnostics service DB/schema</td><td>PASS</td><td>Diagnostics process cwd is <code>services/diagnostics</code>; service <code>.env</code> points to <code>ahealth_dev</code>; exact query used <code>ahealth_dev.public</code>.</td></tr>
+<tr><td>Exact DB result</td><td>PASS</td><td><code>ahealth_dev.public.investigation_orders</code> contains ID <code>34adf903-50e5-4ad6-bd91-9cedfb08b1f5</code>; code <code>Complete Blood Count (CBC)</code>, type <code>laboratory</code>, status <code>ordered</code>, linked thread/patient present.</td></tr>
+<tr><td>Exact API result</td><td>PASS</td><td><code>GET /investigation-orders/34adf903-50e5-4ad6-bd91-9cedfb08b1f5</code> on diagnostics returned the same ID/code/type/status.</td></tr>
+<tr><td>Contradictory no-row query</td><td>RESOLVED</td><td><code>ahealth_test.public</code> has zero rows for that ID; the earlier no-row result was from a different DB context, not evidence that the dev order was gone.</td></tr>
+</tbody></table>
+
+<h2>Doctor Workflows</h2>
+
+<table><thead><tr><th>Workflow</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>Consultation -&gt; messaging -&gt; patient record</td><td>PASS</td><td>Synthetic consultations created/offered/accepted; 3 completed synthetic consultations persisted. Synthetic messages count: 3; read-back by care thread succeeded during API run.</td></tr>
+<tr><td>Diagnostic ordering/list/detail</td><td>PASS</td><td>3 synthetic diagnostic orders persisted with <code>clinical_notes='Synthetic local integration order only'</code>; order detail read-back returned <code>ordered</code>. Admin attempt to create an order returned <code>403</code>.</td></tr>
+<tr><td>Prescription creation -&gt; persistence -&gt; patient record</td><td>PASS</td><td>3 prescriptions persisted with item <code>Synthetic ORS template</code>; API read-back by prescription ID and patient prescription list confirmed the created prescription.</td></tr>
+<tr><td>Follow-up creation/read/check-ins</td><td>PASS</td><td>3 follow-up cycles persisted from completed synthetic consultations; cycle read-back returned <code>active</code>; adherence rows generated from prescriptions. Doctor patient-specific adherence filter returned <code>403</code>, preserving role boundary.</td></tr>
+<tr><td>Availability/slots -&gt; authorized appointment workflow</td><td>PASS</td><td>Doctor availability set true; slot publish/read-back succeeded for slot <code>b7a09df7-16e0-45b7-9f55-8e281e401ab8</code>; appointment <code>01d89e80-b4ac-4d7e-a319-bf1fba0a2b1e</code> booked/read back as <code>booked</code>; early start returned <code>409</code>.</td></tr>
+<tr><td>Consultation completion restrictions</td><td>PASS</td><td>Repeating <code>complete</code> on a completed synthetic consultation returned <code>409</code>.</td></tr>
+<tr><td>Lab-result boundary</td><td>PASS</td><td>Doctor can order/read own orders; result filing remains diagnostics/lab workflow and was not bypassed from doctor-admin.</td></tr>
+</tbody></table>
+
+<h2>Admin Workflows</h2>
+
+<table><thead><tr><th>Workflow</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>Clinician verification</td><td>PASS</td><td>Pending clinician was approved; verified clinician count is now 2.</td></tr>
+<tr><td>Device management</td><td>PASS</td><td>Admin vehicle sensor registration/revocation completed; DB aggregate shows 1 synthetic <code>SYN-%</code> device with status <code>revoked</code>. Patient-worn device attempt without patient profile returned <code>403</code>.</td></tr>
+<tr><td>Emergency dispatch/status</td><td>PASS</td><td>Synthetic emergency <code>b75b84bc-3c1c-4f43-8c8a-8be451cb73cb</code> advanced <code>dispatched -&gt; en_route -&gt; arrived -&gt; resolved</code>; read-back returned <code>resolved</code>. Direct <code>dispatched -&gt; resolved</code> returned <code>409</code>.</td></tr>
+<tr><td>Payment refund</td><td>PASS</td><td>Isolated payment service ran on port <code>5012</code> with <code>DATABASE_URL=...ahealth_test</code>; API created a synthetic cash intent (<code>201</code>, <code>succeeded</code>), refunded <code>2345</code> (<code>201</code>), DB read-back showed <code>partially_refunded</code> and <code>refunded_amount=2345</code>, excess refund returned <code>422 VALIDATION_FAILED</code>; fixture rows were cleaned.</td></tr>
+</tbody></table>
+
+<h2>Analytics</h2>
+
+<table><thead><tr><th>Workflow</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>Surveillance filters/aggregates</td><td>PASS</td><td><code>/surveillance/conditions</code> and <code>/surveillance/trends</code> returned successfully under analytics/admin token during API run; Firefox rendered protected surveillance page.</td></tr>
+<tr><td>Research datasets</td><td>PASS</td><td><code>/research/datasets</code> returned successfully under analytics/admin token during API run. External research export/provider integrations remain mocked/local.</td></tr>
+</tbody></table>
+
+<h2>Service Accounting</h2>
+
+<table><thead><tr><th>Service</th><th>Status</th><th>Notes</th></tr></thead><tbody>
+<tr><td>auth</td><td>PASS</td><td>Login, refresh, invalid refresh, concurrent refresh and tests verified.</td></tr>
+<tr><td>patient</td><td>PASS</td><td>Patient profile ownership used by consultation, appointment, prescription and follow-up workflows.</td></tr>
+<tr><td>doctor</td><td>PASS</td><td>Availability, slots, clinician verification and clinician reads verified.</td></tr>
+<tr><td>appointment</td><td>PASS</td><td>Book/read/early-start restriction verified.</td></tr>
+<tr><td>consultation</td><td>PASS</td><td>Create/queue/accept/complete/prescription/follow-up state restrictions verified.</td></tr>
+<tr><td>messaging</td><td>PASS</td><td>Persisted care-thread message and read-back verified.</td></tr>
+<tr><td>followup</td><td>PASS</td><td>Cycle/adherence creation and role-boundary rejection verified.</td></tr>
+<tr><td>diagnostics</td><td>PASS</td><td>Order create/detail and CBC exact-ID evidence verified.</td></tr>
+<tr><td>admin-facing devices/emergency/facilities</td><td>PASS</td><td>Device and emergency actions verified; facility used as dispatch destination.</td></tr>
+<tr><td>payment</td><td>PASS</td><td>Refund API and service tests verified against <code>ahealth_test</code>; provider remains local/mock.</td></tr>
+<tr><td>insurance</td><td>IMPLEMENTED BUT UNVERIFIED</td><td>Service is routed but no end-to-end claim fixture was exercised.</td></tr>
+<tr><td>notification</td><td>MOCKED</td><td>Local worker/templates present; real SMS/app push delivery not used.</td></tr>
+<tr><td>sync</td><td>IMPLEMENTED BUT UNVERIFIED</td><td>Service is routed; offline sync batch not exercised in this pass.</td></tr>
+<tr><td>gateway</td><td>MOCKED</td><td>Gateway routes exist with signatures; real USSD/SMS providers not used.</td></tr>
+<tr><td>ai</td><td>MOCKED</td><td>Local AI service only; no external AI provider used.</td></tr>
+<tr><td>research/surveillance</td><td>PASS</td><td>Analytics reads verified against current synthetic data.</td></tr>
+</tbody></table>
+
+<h2>Automated Verification</h2>
+
+<table><thead><tr><th>Check</th><th>Status</th><th>Result</th></tr></thead><tbody>
+<tr><td><code>ahealth_test</code> migration</td><td>PASS</td><td>Prisma applied all 12 migrations to <code>ahealth_test</code>.</td></tr>
+<tr><td>Auth tests on isolated DB</td><td>PASS</td><td><code>DATABASE_URL=...ahealth_test pnpm --filter @a-health/auth test</code>: 15 pass, 0 fail.</td></tr>
+<tr><td>Payment tests on isolated DB</td><td>PASS</td><td><code>DATABASE_URL=...ahealth_test pnpm --filter @a-health/payment test</code>: 15 pass, 0 fail. Cleanup now removes failed-intent fixtures for synthetic users.</td></tr>
+<tr><td>App type-checks</td><td>PASS</td><td><code>pnpm --filter doctor-dashboard type-check</code>, <code>admin-console type-check</code>, <code>analytics-portal type-check</code> all passed after login/build fixes.</td></tr>
+<tr><td>Auth build</td><td>PASS</td><td><code>pnpm --filter @a-health/auth build</code> passed.</td></tr>
+<tr><td>Browser automation</td><td>PASS</td><td>Firefox 155 installed under <code>.playwright-browsers</code>; real login forms verified for doctor/admin/analytics in one context, no cookie injection.</td></tr>
+<tr><td>Production builds</td><td>PASS</td><td>Actual webpack diagnostic was build-time <code>next/font/google</code> fetch failure for IBM Plex fonts under restricted network. Replaced with local system font CSS variables and disabled webpack build worker for visible diagnostics. <code>pnpm --filter doctor-dashboard build</code>, <code>admin-console build</code>, <code>analytics-portal build</code> all passed.</td></tr>
+</tbody></table>
+
+<h2>Safe Local Lifecycle</h2>
+
+<p>Use these scripts from the repo root:</p>
+
+<pre><code>
+scripts/local/start.sh all
+scripts/local/status.sh
+scripts/local/stop.sh
+</code></pre>
+
+<p>Safety behavior:</p>
+
+<ul>
+<li>Reuses existing <code>ahealth-pg</code>; does not start the Compose PostgreSQL service.</li>
+<li>Uses gateway port <code>4021</code>, matching service env and Compose.</li>
+<li>Records AHP-owned tmux sessions, visible PIDs, or namespace-safe <code>port:&lt;port&gt;</code> listeners under <code>.dev-logs/pids</code>.</li>
+<li>Removes stale PID files and converts invisible-but-listening services to port-only records instead of reporting false stale failures.</li>
+<li>Refuses duplicate starts when a port is held by a non-AHP process.</li>
+<li>Stops only AHP-owned tmux sessions or processes whose cwd/cmdline identify them as AHP-owned.</li>
+<li>Leaves already-running listeners alone when the listener PID is not visible in the current process namespace.</li>
+<li>Does not use <code>fuser -k</code>, volume deletion, database reset, or destructive migrations.</li>
+</ul>
+
+<p>Verification on 2026-09-12:</p>
+
+<table><thead><tr><th>Check</th><th>Status</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>PID/status mismatch</td><td>PASS</td><td>Root cause was mixed process visibility: the running AHP stack was listening on ports but several listener PIDs were not visible from the managed execution namespace, so old numeric PID files were stale even though services were alive. <code>status.sh</code> now reports these as <code>running</code> port-only records.</td></tr>
+<tr><td><code>stop -&gt; status -&gt; start -&gt; status</code></td><td>PASS</td><td><code>stop.sh</code> preserved existing port-only listeners, stopped only AHP-owned tmux sessions, removed stale records, and <code>start.sh all</code> restarted missing services without duplicate launches.</td></tr>
+<tr><td>Backend health</td><td>PASS</td><td><code>/health</code> returned HTTP <code>200</code> for every service port <code>4001</code> through <code>4025</code>, including patient <code>4002</code>, notification <code>4008</code>, insurance <code>4018</code>, gateway <code>4021</code>, and sync <code>4022</code>.</td></tr>
+<tr><td>App availability</td><td>PASS</td><td>Apps on <code>3100</code>, <code>3200</code>, and <code>3300</code> responded with protected-route redirects (<code>307</code>), matching authenticated-app routing expectations.</td></tr>
+<tr><td>Container preservation</td><td>PASS</td><td><code>docker ps</code> showed <code>ahealth-pg</code>, <code>dvwa-db-1</code>, and <code>dvwa-dvwa-1</code> still running; no Compose PostgreSQL was started and no DVWA container was stopped.</td></tr>
+<tr><td>Sandbox detach behavior</td><td>BLOCKED</td><td>Detached processes and tmux sessions created from a finished managed command are reaped by the executor environment. For this acceptance-prep session, missing services were held in a live foreground supervisor while health was verified; running the same scripts from a normal local shell should keep tmux sessions alive.</td></tr>
+</tbody></table>
+</body></html>

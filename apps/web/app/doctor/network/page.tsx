@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { serverGet } from '@/lib/serverToken';
 import type { Discussion, Page } from '@/lib/api';
-import { Card, Empty, PageHeader } from '@/components/ui';
+import { Badge, Card, Empty, PageHeader, PageShell } from '@/components/ui';
 import { dateTime } from '@/lib/format';
 import { NewDiscussion } from '@/components/NewDiscussion';
 
@@ -18,35 +18,35 @@ export default async function NetworkPage() {
   const discussions = await serverGet<Page<Discussion>>('/network/discussions?limit=30');
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <PageShell>
       <PageHeader
-        title="Jamii ya wataalamu"
-        lede="Majadiliano ya kesi hayaunganishwi kamwe na utambulisho wa mgonjwa. Unachoshiriki ni swali la kitabibu."
+        title="Professional network"
+        lede="Case discussions are shared as clinical questions, not patient identity."
       />
 
       <NewDiscussion communities={communities?.data ?? []} />
 
-      <h2 className="mt-10 text-sm font-semibold uppercase tracking-wide text-ink-soft">Majadiliano</h2>
+      <h2 className="mt-10 text-sm font-semibold uppercase tracking-wide text-ink-soft">Discussions</h2>
       {(discussions?.data ?? []).length === 0 ? (
-        <Empty>Hakuna majadiliano bado.</Empty>
+        <Empty>No discussions have been opened yet.</Empty>
       ) : (
         <ul className="mt-3 flex flex-col gap-3">
           {(discussions?.data ?? []).map((d) => (
             <li key={d.id}>
               <Card>
-                <Link href={`/network/${d.id}`} className="font-medium text-petrol underline underline-offset-4">
+                <Link href={`/doctor/network/${d.id}`} className="font-medium text-petrol underline underline-offset-4">
                   {d.title}
                 </Link>
                 <p className="mt-1 line-clamp-2 text-[0.95rem] text-ink-soft">{d.body}</p>
                 <p className="mt-2 text-sm text-ink-soft">
-                  {d.reply_count} majibu · {dateTime(d.created_at)}
-                  {d.is_case_discussion ? ' · majadiliano ya kesi' : ''}
+                  {d.reply_count} replies · {dateTime(d.created_at)}
+                  {d.is_case_discussion ? <span> · <Badge tone="info">case discussion</Badge></span> : ''}
                 </p>
               </Card>
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </PageShell>
   );
 }

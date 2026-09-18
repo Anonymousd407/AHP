@@ -69,17 +69,17 @@ export function Nav() {
   const role = data?.user?.role ?? roleFromPath(pathname);
   const groups = itemsFor(role);
   return (
-    <aside className="w-72 shrink-0 bg-navy text-white shadow-xl max-md:w-full">
-      <div className="sticky top-0 flex h-screen flex-col overflow-y-auto p-5 max-md:h-auto">
+    <aside className="w-72 shrink-0 bg-navy text-white shadow-xl shadow-navy/25 max-md:w-full">
+      <div className="sticky top-0 flex h-screen flex-col overflow-y-auto border-r border-white/10 p-5 max-md:h-auto max-md:border-b max-md:border-r-0">
         <Link href="/" className="flex items-center gap-3 text-lg font-semibold tracking-tight text-white">
-          <span className="grid size-9 place-items-center rounded-md bg-teal text-navy">
+          <span className="grid size-9 place-items-center rounded-md bg-teal text-navy shadow-sm shadow-teal/20">
             <HeartPulse size={20} aria-hidden />
           </span>
           A-health
         </Link>
         <p className="mt-2 text-xs capitalize text-slate-300">{role?.replace('_', ' ') ?? 'Staff workspace'}</p>
 
-        <nav className="mt-6 flex-1 max-md:flex max-md:gap-5 max-md:overflow-x-auto">
+        <nav className="mt-6 flex-1 max-md:flex max-md:gap-5 max-md:overflow-x-auto max-md:pb-2">
           {groups.map((group) => (
             <div key={group.label} className="mb-6 max-md:mb-2 max-md:min-w-48">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{group.label}</p>
@@ -89,8 +89,9 @@ export function Nav() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex min-h-10 items-center gap-2.5 rounded-md px-3 text-[0.95rem] transition-colors ${
-                      active ? 'bg-teal text-navy font-semibold' : 'text-slate-300 hover:bg-navy-lift hover:text-white'
+                    aria-current={active ? 'page' : undefined}
+                    className={`flex min-h-10 items-center gap-2.5 rounded-md px-3 text-[0.95rem] transition-colors focus-visible:outline-teal ${
+                      active ? 'bg-teal text-navy font-semibold shadow-sm shadow-teal/20' : 'text-slate-300 hover:bg-navy-lift hover:text-white'
                     }`}
                   >
                     <item.icon size={17} aria-hidden />
@@ -110,7 +111,7 @@ export function Nav() {
             await signOut({ redirect: false, callbackUrl: '/login' });
             window.location.assign('/login');
           }}
-          className="flex min-h-10 items-center gap-2.5 rounded-md px-3 text-[0.95rem] text-slate-300 transition-colors hover:bg-navy-lift hover:text-white"
+          className="flex min-h-10 items-center gap-2.5 rounded-md px-3 text-[0.95rem] text-slate-300 transition-colors hover:bg-navy-lift hover:text-white focus-visible:outline-teal"
         >
           <LogOut size={17} aria-hidden />
           {signingOut ? 'Signing out...' : 'Sign out'}

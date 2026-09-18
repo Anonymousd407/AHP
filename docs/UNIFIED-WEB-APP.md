@@ -109,6 +109,20 @@ Verified on 2026-09-13 against `http://localhost:3000`.
 - Desktop check used 1366 x 900 Firefox viewport.
 - Mobile-width check used 390 x 844 Firefox viewport on `/admin/dashboard`.
 
+Additional staff UI/demo milestone evidence on 2026-09-13:
+
+- Demo namespace: `AHP_STAFF_DEMO_V1`.
+- Seed command: `AHP_STAFF_DEMO_CONFIRM=write-local-ahealth_dev pnpm seed:staff-demo`.
+- Undo command: `AHP_STAFF_DEMO_CONFIRM=write-local-ahealth_dev pnpm undo:staff-demo`.
+- Demo manifest: `test-results/ahp-staff-demo/manifest.json`.
+- Pre-seed private database backup: `/home/kali/ahp-local-backups/ahp-staff-ui-demo-preseed-20260913-150843/`.
+- Post-build Firefox verification screenshots: `test-results/ahp-staff-demo/screenshots/`.
+- `pnpm --filter a-health-web type-check`: passed.
+- `pnpm --filter a-health-web build`: passed while `next dev` on port 3000 was stopped.
+- `set -a; . services/followup/.env; set +a; pnpm --filter @a-health/followup test`: passed outside the sandbox with local Postgres access, 18 tests passed.
+- Firefox verified real clinician, demo specialist clinician, demo unrelated clinician and platform admin sessions, Doctor/Admin/Analytics navigation, clinician denial from Admin/Analytics, unrelated clinician denial from the demo care thread, persisted messaging/read-back/reply, direct refresh, logout, mobile width and generated CSS response.
+- Final post-build CSS evidence after a clean dev restart: `/_next/static/css/app/layout.css` returned `200 text/css`; login shell background was `rgb(7, 26, 47)` and the primary sign-in button was `rgb(15, 76, 67)`.
+
 ## Remaining Migration Gaps
 
 - The unified app reuses the existing service-backed screens. Some pages can show empty states when local seed data has no current records, for example offered clinician queue items.

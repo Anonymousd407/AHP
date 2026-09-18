@@ -19,9 +19,9 @@ export function AppointmentActions({ id }: { id: string }) {
     setBusy(true); setError(null);
     try {
       const res = await api.post<{ id: string }>(`/appointments/${id}/start`, {}, idem());
-      router.push(`/case/${res.data.id}`);
+      router.push(`/doctor/case/${res.data.id}`);
     } catch (e) {
-      setError(errorMessage(e, 'Miadi haikuweza kuanzishwa. Huenda ni mapema mno.'));
+      setError(errorMessage(e, 'The appointment could not be started. It may be too early.'));
       setBusy(false);
     }
   }
@@ -32,15 +32,15 @@ export function AppointmentActions({ id }: { id: string }) {
       await api.post(`/appointments/${id}/cancel`, {}, idem());
       router.refresh();
     } catch (e) {
-      setError(errorMessage(e, 'Haikuweza kughairiwa.'));
+      setError(errorMessage(e, 'The appointment could not be cancelled.'));
     } finally { setBusy(false); }
   }
 
   return (
     <div className="mt-3">
       <div className="flex gap-3">
-        <Button onClick={start} disabled={busy}>Anzisha</Button>
-        <Button variant="quiet" onClick={cancel} disabled={busy}>Ghairi</Button>
+        <Button onClick={start} disabled={busy}>Start</Button>
+        <Button variant="quiet" onClick={cancel} disabled={busy}>Cancel</Button>
       </div>
       {error && <div className="mt-2"><Notice>{error}</Notice></div>}
     </div>

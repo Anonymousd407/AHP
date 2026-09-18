@@ -31,7 +31,7 @@ export function MedicationSearch() {
       });
       setResults(res.data.data ?? []);
     } catch (e) {
-      setError(errorMessage(e, 'Utafutaji haukufanikiwa.'));
+      setError(errorMessage(e, 'Medication search failed.'));
     } finally { setBusy(false); }
   }
 
@@ -39,19 +39,19 @@ export function MedicationSearch() {
     <div className="mt-6">
       <form onSubmit={search} className="flex flex-wrap items-end gap-3">
         <div className="flex-1">
-          <Field label="Jina la dawa" htmlFor="m">
+          <Field label="Medication name" htmlFor="m">
             <input id="m" required value={name} onChange={(e) => setName(e.target.value)}
               placeholder="Amoxicillin" className={inputClass} />
           </Field>
         </div>
-        <Button type="submit" disabled={busy || !name.trim()}>Tafuta</Button>
+        <Button type="submit" disabled={busy || !name.trim()}>{busy ? 'Searching...' : 'Search'}</Button>
       </form>
 
       {error && <div className="mt-4"><Notice>{error}</Notice></div>}
 
       {results !== null && (
         results.length === 0 ? (
-          <p className="mt-6 text-ink-soft">Hakuna duka lililoripoti dawa hii karibu.</p>
+          <p className="mt-6 text-ink-soft">No nearby pharmacy has reported this medication.</p>
         ) : (
           <ul className="mt-6 flex flex-col gap-3">
             {results.map((r, i) => (
@@ -64,14 +64,13 @@ export function MedicationSearch() {
                     )}
                   </div>
                   <p className="mt-1 text-[0.95rem]">
-                    {r.medication_name} · {r.stock_status === 'in_stock' ? 'ipo'
-                      : r.stock_status === 'low_stock' ? 'imebaki kidogo' : 'imeisha'}
+                    {r.medication_name} · {r.stock_status.replace(/_/g, ' ')}
                     {r.unit_price ? ` · ${r.unit_price} ${r.currency ?? ''}` : ''}
                   </p>
                   {/* Stock data ages fast; a stale figure sends someone on a
                       journey for nothing, so the age travels with the answer. */}
                   <p className="mt-1 text-xs text-ink-soft">
-                    Iliripotiwa {dateTime(r.last_reported_at)}
+                    Reported {dateTime(r.last_reported_at)}
                   </p>
                 </Card>
               </li>

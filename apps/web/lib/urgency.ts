@@ -10,21 +10,21 @@ import type { Urgency } from './api';
 export function urgencyStyle(level: Urgency) {
   switch (level) {
     case 'emergency':
-      return { border: 'border-l-4 border-clay', label: 'Dharura', text: 'text-clay' };
+      return { border: 'border-l-4 border-clay', label: 'Emergency', text: 'text-clay' };
     case 'urgent':
-      return { border: 'border-l-4 border-amber', label: 'Haraka', text: 'text-amber' };
+      return { border: 'border-l-4 border-amber', label: 'Urgent', text: 'text-amber' };
     default:
-      return { border: 'border-l-4 border-line', label: 'Kawaida', text: 'text-ink-soft' };
+      return { border: 'border-l-4 border-line', label: 'Routine', text: 'text-ink-soft' };
   }
 }
 
 /** A lab flag means the same thing as a triage level: how fast must someone look. */
 export function flagStyle(flag: string) {
   if (flag === 'critical_low' || flag === 'critical_high') {
-    return { text: 'text-clay font-semibold', label: 'Hatari' };
+    return { text: 'text-clay font-semibold', label: 'Critical' };
   }
   if (flag === 'low' || flag === 'high') {
-    return { text: 'text-amber', label: flag === 'low' ? 'Chini' : 'Juu' };
+    return { text: 'text-amber', label: flag === 'low' ? 'Low' : 'High' };
   }
-  return { text: 'text-ink-soft', label: 'Kawaida' };
+  return { text: 'text-ink-soft', label: 'Normal' };
 }

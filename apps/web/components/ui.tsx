@@ -8,12 +8,16 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 export function Button({
   children, variant = 'primary', className = '', ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'quiet' | 'danger' }) {
-  const base = 'min-h-11 px-5 py-2.5 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed';
+  const base = 'inline-flex min-h-11 items-center justify-center gap-2 px-5 py-2.5 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-petrol';
   const kind =
-    variant === 'primary' ? 'bg-petrol text-white shadow-sm hover:bg-petrol-lift'
-    : variant === 'danger' ? 'bg-clay text-white hover:opacity-90'
-    : 'text-petrol underline underline-offset-4 hover:text-petrol-lift';
+    variant === 'primary' ? 'bg-petrol text-white shadow-sm shadow-petrol/20 hover:bg-petrol-lift'
+    : variant === 'danger' ? 'bg-clay text-white shadow-sm shadow-clay/20 hover:opacity-90'
+    : 'border border-line bg-white text-petrol shadow-sm hover:border-petrol hover:bg-teal/10 hover:text-petrol-lift';
   return <button className={`${base} rounded-md ${kind} ${className}`} {...props}>{children}</button>;
+}
+
+export function PageShell({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={`staff-page px-4 py-6 sm:px-6 lg:px-8 ${className}`}>{children}</div>;
 }
 
 /**
@@ -42,7 +46,25 @@ export function PageHeader({ title, lede, action }: { title: string; lede?: stri
 }
 
 export function Card({ children, accent = '', className = '' }: { children: ReactNode; accent?: string; className?: string }) {
-  return <article className={`rounded-lg bg-white p-4 shadow-sm ${accent || 'border border-line'} ${className}`}>{children}</article>;
+  return <article className={`rounded-lg bg-white/95 p-4 shadow-sm shadow-navy/5 ring-1 ring-black/5 ${accent || 'border border-line'} ${className}`}>{children}</article>;
+}
+
+export function Badge({ children, tone = 'neutral' }: { children: ReactNode; tone?: 'neutral' | 'good' | 'attention' | 'problem' | 'info' }) {
+  const toneClass =
+    tone === 'good' ? 'border-teal/40 bg-teal/10 text-petrol'
+    : tone === 'attention' ? 'border-amber/40 bg-amber/10 text-amber'
+    : tone === 'problem' ? 'border-clay/40 bg-clay/10 text-clay'
+    : tone === 'info' ? 'border-blue/40 bg-blue/10 text-blue'
+    : 'border-line bg-paper-sunk text-ink-soft';
+  return (
+    <span className={`inline-flex min-h-7 items-center rounded-full border px-2.5 text-xs font-semibold uppercase tracking-wide ${toneClass}`}>
+      {children}
+    </span>
+  );
+}
+
+export function SectionTitle({ children }: { children: ReactNode }) {
+  return <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-soft">{children}</h2>;
 }
 
 /**
@@ -54,7 +76,7 @@ export function Empty({ children }: { children: ReactNode }) {
 }
 
 export function Loading() {
-  return <p className="py-10 text-ink-soft">Inapakia...</p>;
+  return <p className="py-10 text-ink-soft">Loading...</p>;
 }
 
 export function Field({

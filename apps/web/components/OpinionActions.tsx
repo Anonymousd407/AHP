@@ -23,7 +23,7 @@ export function OpinionActions({ id, status }: { id: string; status: string }) {
       await api.post(`/network/second-opinions/${id}/claim`, {}, idem());
       router.refresh();
     } catch (e) {
-      setError(errorMessage(e, 'Swali hili limekwisha chukuliwa na mtu mwingine.'));
+      setError(errorMessage(e, 'This question has already been claimed by someone else.'));
     } finally { setBusy(false); }
   }
 
@@ -35,7 +35,7 @@ export function OpinionActions({ id, status }: { id: string; status: string }) {
       setAnswering(false);
       router.refresh();
     } catch (e) {
-      setError(errorMessage(e, 'Jibu halikutumwa.'));
+      setError(errorMessage(e, 'The answer was not sent.'));
     } finally { setBusy(false); }
   }
 
@@ -43,19 +43,19 @@ export function OpinionActions({ id, status }: { id: string; status: string }) {
 
   return (
     <div className="mt-3">
-      {status === 'open' && <Button onClick={claim} disabled={busy}>Chukua swali hili</Button>}
+      {status === 'open' && <Button onClick={claim} disabled={busy}>Claim this question</Button>}
 
       {status === 'claimed' && !answering && (
-        <Button onClick={() => setAnswering(true)}>Jibu</Button>
+        <Button onClick={() => setAnswering(true)}>Answer</Button>
       )}
 
       {answering && (
         <form onSubmit={submit} className="flex flex-col gap-3">
           <textarea rows={4} required value={answer} onChange={(e) => setAnswer(e.target.value)}
-            placeholder="Andika maoni yako..." className={areaClass} />
+            placeholder="Write your opinion..." className={areaClass} />
           <div className="flex gap-3">
-            <Button type="submit" disabled={busy || !answer.trim()}>Tuma jibu</Button>
-            <Button type="button" variant="quiet" onClick={() => setAnswering(false)}>Ghairi</Button>
+            <Button type="submit" disabled={busy || !answer.trim()}>Send answer</Button>
+            <Button type="button" variant="quiet" onClick={() => setAnswering(false)}>Cancel</Button>
           </div>
         </form>
       )}

@@ -22,7 +22,7 @@ export function QueueView() {
       setEntries(res.data?.data ?? []);
       setError(null);
     } catch {
-      setError('Foleni haikuweza kupakiwa. Inajaribu tena yenyewe.');
+      setError('The queue could not be loaded. It will retry automatically.');
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export function QueueView() {
       // in order to go looking for it in another tab.
       router.push(`/doctor/case/${id}`);
     } catch (e) {
-      setError(errorMessage(e, 'Kesi haikukubaliwa. Huenda mtu mwingine amekwisha ichukua.'));
+      setError(errorMessage(e, 'This case could not be accepted. Another clinician may have taken it.'));
       void load();
     } finally {
       setBusyId(null);
@@ -60,7 +60,7 @@ export function QueueView() {
       await api.post(`/consultations/${id}/decline`, { reason }, idem());
       setEntries((l) => l.filter((e) => e.consultation.id !== id));
     } catch (e) {
-      setError(errorMessage(e, 'Ombi la kukataa halikufanikiwa.'));
+      setError(errorMessage(e, 'The decline request did not complete.'));
       void load();
     } finally {
       setBusyId(null);
@@ -69,13 +69,13 @@ export function QueueView() {
 
   return (
     <div>
-      <div className="flex gap-1 border-b border-line">
+      <div className="flex gap-1 border-b border-line bg-paper-sunk/60 px-3 pt-3">
         {(['offered', 'mine'] as const).map((s) => (
           <button key={s} onClick={() => setScope(s)}
-            className={`min-h-11 px-4 text-[0.95rem] ${
-              scope === s ? 'border-b-2 border-petrol font-medium text-petrol' : 'text-ink-soft hover:text-ink'
+            className={`min-h-11 rounded-t-md px-4 text-[0.95rem] transition-colors ${
+              scope === s ? 'border-b-2 border-petrol bg-white font-semibold text-petrol shadow-sm' : 'text-ink-soft hover:bg-white/70 hover:text-ink'
             }`}>
-            {s === 'offered' ? 'Zinasubiri jibu' : 'Zangu'}
+            {s === 'offered' ? 'Offered to me' : 'My active cases'}
           </button>
         ))}
       </div>
@@ -84,10 +84,10 @@ export function QueueView() {
 
       {loading ? <Loading /> : entries.length === 0 ? (
         <Empty>
-          {scope === 'offered' ? 'Hakuna kesi inayosubiri kwa sasa.' : 'Huna kesi unayoshughulikia.'}
+          {scope === 'offered' ? 'No offered cases are waiting right now.' : 'You do not have active cases assigned.'}
         </Empty>
       ) : (
-        <ul className="mt-4 flex flex-col gap-3">
+        <ul className="grid gap-3 p-4 lg:grid-cols-2">
           {entries.map((e) => (
             <li key={e.consultation.id}>
               <QueueCard entry={e} scope={scope} busy={busyId === e.consultation.id}

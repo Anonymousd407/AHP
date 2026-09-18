@@ -29,30 +29,30 @@ export function ReferForOpinion({ careThreadId }: { careThreadId: string }) {
       await api.post('/network/second-opinions', { care_thread_id: careThreadId, specialty, question }, idem());
       setDone(true); setOpen(false);
     } catch {
-      setError('Ombi halikutumwa. Jaribu tena.');
+      setError('The opinion request was not sent. Try again.');
     } finally { setBusy(false); }
   }
 
-  if (done) return <p className="text-sm text-ink-soft">Ombi limetumwa. Mtaalamu atajibu atakapoweza.</p>;
-  if (!open) return <Button variant="quiet" onClick={() => setOpen(true)}>Omba maoni ya pili</Button>;
+  if (done) return <p className="text-sm text-ink-soft">Opinion request sent. A specialist can answer when available.</p>;
+  if (!open) return <Button variant="quiet" onClick={() => setOpen(true)}>Request second opinion</Button>;
 
   return (
-    <form onSubmit={submit} className="w-full border border-line bg-white p-4">
-      <p className="text-sm font-medium">Omba maoni ya mtaalamu</p>
+    <form onSubmit={submit} className="w-full rounded-lg border border-line bg-white p-4 shadow-sm">
+      <p className="text-sm font-medium">Request a specialist opinion</p>
       <div className="mt-3 flex flex-col gap-3">
-        <Field label="Utaalamu" htmlFor="sp">
+        <Field label="Specialty" htmlFor="sp">
           <select id="sp" value={specialty} onChange={(e) => setSpecialty(e.target.value)} className={inputClass}>
             {SPECIALTIES.map((s) => <option key={s} value={s}>{s.replace(/_/g, ' ')}</option>)}
           </select>
         </Field>
-        <Field label="Swali lako" htmlFor="q">
+        <Field label="Question" htmlFor="q">
           <textarea id="q" required rows={3} value={question}
             onChange={(e) => setQuestion(e.target.value)} className={areaClass} />
         </Field>
         {error && <Notice>{error}</Notice>}
         <div className="flex gap-3">
-          <Button type="submit" disabled={busy || !question.trim()}>Tuma ombi</Button>
-          <Button type="button" variant="quiet" onClick={() => setOpen(false)}>Ghairi</Button>
+          <Button type="submit" disabled={busy || !question.trim()}>Send request</Button>
+          <Button type="button" variant="quiet" onClick={() => setOpen(false)}>Cancel</Button>
         </div>
       </div>
     </form>

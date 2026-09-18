@@ -27,9 +27,9 @@ export function AvailabilityToggle({ initial = true }: { initial?: boolean }) {
 
   return (
     <button onClick={toggle} disabled={busy} aria-pressed={on}
-      className="flex items-center gap-2 text-sm disabled:opacity-50">
-      <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${on ? 'bg-petrol' : 'bg-ink-soft'}`} />
-      {on ? 'Unapokea kesi' : 'Hupokei kesi'}
+      className="flex min-h-10 items-center gap-2 rounded-md border border-line bg-white px-3 text-sm font-medium text-ink shadow-sm disabled:opacity-50">
+      <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${on ? 'bg-teal' : 'bg-ink-soft'}`} />
+      {on ? 'Accepting cases' : 'Not accepting cases'}
     </button>
   );
 }

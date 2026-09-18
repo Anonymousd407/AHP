@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { serverGet } from '@/lib/serverToken';
 import type { Page } from '@/lib/api';
-import { Card, Empty, PageHeader } from '@/components/ui';
+import { Badge, Card, Empty, PageHeader, PageShell } from '@/components/ui';
 import { dateTime } from '@/lib/format';
 
 interface AdherenceLog {
@@ -27,14 +27,14 @@ export default async function FollowUpPage() {
   const rest = logs.filter((l) => l.reported_status !== 'missed');
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <PageShell>
       <PageHeader
-        title="Ufuatiliaji"
-        lede="Vipimo vya dawa vilivyoripotiwa. Dozi zilizokosa zinaonyeshwa kwanza."
+        title="Follow-up"
+        lede="Reported medication adherence. Missed doses are shown first because they are the ones drifting from the care plan."
       />
 
       {logs.length === 0 ? (
-        <Empty>Hakuna ufuatiliaji unaoendelea.</Empty>
+        <Empty>No active follow-up records are available.</Empty>
       ) : (
         <ul className="mt-6 flex flex-col gap-3">
           {[...missed, ...rest].map((l) => (
@@ -42,11 +42,9 @@ export default async function FollowUpPage() {
               <Card accent={l.reported_status === 'missed' ? 'border-l-4 border-amber' : 'border border-line'}>
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <span className="font-medium">{l.medication_name} {l.dosage}</span>
-                  <span className={`text-sm ${l.reported_status === 'missed' ? 'text-amber' : 'text-ink-soft'}`}>
-                    {l.reported_status === 'taken' ? 'Alikunywa'
-                      : l.reported_status === 'missed' ? 'Hakukunywa'
-                      : l.reported_status === 'partial' ? 'Kwa sehemu' : 'Hajaripoti'}
-                  </span>
+                  <Badge tone={l.reported_status === 'missed' ? 'attention' : l.reported_status === 'taken' ? 'good' : 'neutral'}>
+                    {l.reported_status.replace(/_/g, ' ')}
+                  </Badge>
                 </div>
                 <p className="mt-1 text-sm text-ink-soft">{dateTime(l.scheduled_at)}</p>
               </Card>
@@ -54,6 +52,6 @@ export default async function FollowUpPage() {
           ))}
         </ul>
       )}
-    </div>
+    </PageShell>
   );
 }

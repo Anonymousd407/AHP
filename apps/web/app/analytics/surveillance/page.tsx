@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { PageHeader } from '@/components/ui';
+import { PageHeader, PageShell } from '@/components/ui';
 import { SurveillanceView } from '@/components/SurveillanceView';
 
 export default async function SurveillancePage() {
@@ -9,12 +9,12 @@ export default async function SurveillancePage() {
   if (!session) redirect('/login');
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-8">
+    <PageShell>
       <PageHeader
-        title="Ufuatiliaji wa magonjwa"
-        lede="Hesabu za magonjwa kutoka kwa vipimo vya madaktari, zilizokusanywa kwa eneo. Hakuna taarifa ya mtu binafsi hapa."
+        title="Disease surveillance"
+        lede="Aggregated condition counts by geography and period. Patient-identifying details are not rendered in this workspace."
       />
       <SurveillanceView />
-    </div>
+    </PageShell>
   );
 }

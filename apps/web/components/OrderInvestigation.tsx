@@ -46,17 +46,17 @@ export function OrderInvestigation({
       setNotes('');
       router.refresh();
     } catch (e) {
-      setError(errorMessage(e, 'Ombi la kipimo halikufanikiwa.'));
+      setError(errorMessage(e, 'The investigation order could not be created.'));
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <form onSubmit={submit} className="border border-line bg-white p-4">
-      <h2 className="text-base font-semibold">Omba kipimo</h2>
+    <form onSubmit={submit} className="rounded-lg border border-line bg-white p-4 shadow-sm">
+      <h2 className="text-base font-semibold">Order investigation</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
-        <Field label="Kipimo" htmlFor="investigation-code">
+        <Field label="Investigation" htmlFor="investigation-code">
           <select
             id="investigation-code"
             value={code}
@@ -71,7 +71,7 @@ export function OrderInvestigation({
         <div className="self-end text-sm text-ink-soft">{selected.type}</div>
       </div>
       <div className="mt-3">
-        <Field label="Maelezo ya kliniki" htmlFor="investigation-notes" hint="Hiari">
+        <Field label="Clinical notes" htmlFor="investigation-notes" hint="Optional">
           <textarea
             id="investigation-notes"
             value={notes}
@@ -83,11 +83,11 @@ export function OrderInvestigation({
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-4">
         <Button type="submit" disabled={busy}>
-          {busy ? 'Inaomba...' : 'Omba kipimo'}
+          {busy ? 'Ordering...' : 'Order investigation'}
         </Button>
         {orderId && (
-          <Link href={`/diagnostics/${orderId}`} className="text-sm text-petrol underline underline-offset-4">
-            Fungua ombi
+          <Link href={`/doctor/diagnostics/${orderId}`} className="text-sm text-petrol underline underline-offset-4">
+            Open order
           </Link>
         )}
       </div>

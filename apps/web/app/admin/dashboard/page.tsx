@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { PageHeader, Card } from '@/components/ui';
+import { Badge, PageHeader, Card, PageShell } from '@/components/ui';
 import { serverGet } from '@/lib/serverToken';
 import type { ClinicianProfile, Device, EmergencyRequest, Facility, IncidentReport, Page, Payment } from '@/lib/api';
 
 function Stat({ label, value, href }: { label: string; value: number | string; href: string }) {
   return (
-    <Link href={href} className="rounded-lg border border-line bg-white p-4 shadow-sm transition-colors hover:border-teal">
+    <Link href={href} className="rounded-lg border border-line bg-white/95 p-4 shadow-sm shadow-navy/5 transition-colors hover:border-teal focus-visible:outline-petrol">
       <span className="text-sm text-ink-soft">{label}</span>
       <strong className="mt-2 block text-3xl font-semibold text-ink">{value}</strong>
     </Link>
@@ -28,11 +28,14 @@ export default async function AdminDashboard() {
   const openIncidents = incidents?.data?.filter((i) => i.status !== 'closed').length ?? 0;
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-8">
-      <PageHeader
-        title="Operations dashboard"
-        lede="Live staff operations entry point across emergency response, clinician verification, payments, devices, facilities and quality."
-      />
+    <PageShell>
+      <Card className="bg-gradient-to-br from-white to-teal/10">
+        <PageHeader
+          title="Operations dashboard"
+          lede="Authorised operational queues across emergency response, clinician verification, payments, devices, facilities and quality."
+          action={<Badge tone="good">Local staff demo</Badge>}
+        />
+      </Card>
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Open emergencies" value={openEmergencies} href="/admin/emergency" />
@@ -59,6 +62,6 @@ export default async function AdminDashboard() {
           </p>
         </Card>
       </section>
-    </div>
+    </PageShell>
   );
 }

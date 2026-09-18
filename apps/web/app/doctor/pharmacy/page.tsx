@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { PageHeader } from '@/components/ui';
+import { PageHeader, PageShell } from '@/components/ui';
 import { MedicationSearch } from '@/components/MedicationSearch';
 
 export default async function PharmacyPage() {
@@ -9,12 +9,12 @@ export default async function PharmacyPage() {
   if (!session) redirect('/login');
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <PageShell>
       <PageHeader
-        title="Upatikanaji wa dawa"
-        lede="Angalia dawa ipo wapi kabla ya kuiandika. Maandiko yasiyo na dawa inayopatikana si matibabu."
+        title="Pharmacy availability"
+        lede="Check stock before relying on a medication plan. This screen reads the existing pharmacy service."
       />
       <MedicationSearch />
-    </div>
+    </PageShell>
   );
 }

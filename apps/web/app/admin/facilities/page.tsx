@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { serverGet } from '@/lib/serverToken';
 import type { Facility, Page } from '@/lib/api';
-import { Card, Empty, PageHeader } from '@/components/ui';
+import { Badge, Card, Empty, PageHeader, PageShell } from '@/components/ui';
 
 export default async function FacilitiesPage() {
   const session = await getServerSession(authOptions);
@@ -14,35 +14,35 @@ export default async function FacilitiesPage() {
   const items = page?.data ?? [];
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <PageShell>
       <PageHeader
-        title="Vituo"
-        lede="Vituo vilivyothibitishwa pekee vinaonekana. Kiwango cha ushirikiano kinaonyesha ni kiasi gani cha data hai kinapatikana."
+        title="Facilities"
+        lede="Registered facilities and their integration depth. Detail pages show the authoritative service queue where available."
       />
 
       {items.length === 0 ? (
-        <Empty>Hakuna kituo kilichosajiliwa.</Empty>
+        <Empty>No facilities are registered.</Empty>
       ) : (
         <ul className="mt-6 flex flex-col gap-3">
           {items.map((f) => (
             <li key={f.id}>
               <Card>
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
-                  <Link href={`/facilities/${f.id}`} className="font-medium text-petrol underline underline-offset-4">
+                  <Link href={`/admin/facilities/${f.id}`} className="font-medium text-petrol underline underline-offset-4">
                     {f.name}
                   </Link>
-                  <span className="text-sm text-ink-soft">{f.type}</span>
+                  <Badge tone="info">{f.type.replace(/_/g, ' ')}</Badge>
                 </div>
                 <p className="mt-1 text-sm text-ink-soft">
-                  {f.region_code ?? 'Eneo halijulikani'}
+                  {f.region_code ?? 'Region unknown'}
                   {f.contact_phone ? ` · ${f.contact_phone}` : ''}
-                  {' · '}ushirikiano: {f.integration_level}
+                  {' · '}integration: {f.integration_level.replace(/_/g, ' ')}
                 </p>
               </Card>
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </PageShell>
   );
 }

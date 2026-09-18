@@ -7,7 +7,9 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
-    "test": "turbo test"
+    "test": "turbo test",
+    "seed:staff-demo": "tsx scripts/seed-staff-demo.ts",
+    "undo:staff-demo": "tsx scripts/seed-staff-demo.ts --undo"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

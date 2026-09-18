@@ -1,4 +1,4 @@
-// File: /home/egovirdc/SOSPRO/A-health platform/Web/apps/analytics/app/api/auth/[...nextauth]/route.ts
+// File: /home/kali/Documents/cerficates/Projects/high_level/AHP/apps/analytics/app/api/auth/[...nextauth]/route.ts
 import * as entry from '../../../../../../app/api/auth/[...nextauth]/route.js'
 import type { NextRequest } from 'next/server.js'
 

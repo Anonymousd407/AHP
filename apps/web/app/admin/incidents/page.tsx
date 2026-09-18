@@ -3,11 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { serverGet } from '@/lib/serverToken';
 import type { IncidentReport, Page } from '@/lib/api';
-import { Card, Empty, PageHeader } from '@/components/ui';
+import { Badge, Card, Empty, PageHeader, PageShell } from '@/components/ui';
 import { dateTime } from '@/lib/format';
 
 const SEVERITY_LABEL: Record<string, string> = {
-  low: 'Ndogo', moderate: 'Wastani', serious: 'Kubwa', catastrophic: 'Mbaya sana',
+  low: 'Low', moderate: 'Moderate', serious: 'Serious', catastrophic: 'Catastrophic',
 };
 
 export default async function IncidentsPage() {
@@ -18,14 +18,14 @@ export default async function IncidentsPage() {
   const items = page?.data ?? [];
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <PageShell>
       <PageHeader
-        title="Ripoti za matukio"
-        lede="Zilizopandishwa kwa uongozi zinawekwa juu. Lengo ni kuboresha, si kuadhibu — lakini hilo linafanya kazi tu kama ripoti inafika kwa mwenye uwezo wa kuchukua hatua."
+        title="Incident reports"
+        lede="Governance-escalated reports are visible for operational follow-up. Anonymous reports remain anonymous."
       />
 
       {items.length === 0 ? (
-        <Empty>Hakuna ripoti iliyowasilishwa.</Empty>
+        <Empty>No incident reports have been submitted.</Empty>
       ) : (
         <ul className="mt-6 flex flex-col gap-3">
           {items.map((r) => (
@@ -37,11 +37,9 @@ export default async function IncidentsPage() {
               }>
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
                   <span className="font-medium">{r.category.replace(/_/g, ' ')}</span>
-                  <span className={`text-sm ${
-                    r.severity === 'catastrophic' || r.severity === 'serious' ? 'text-clay' : 'text-ink-soft'
-                  }`}>
+                  <Badge tone={r.severity === 'catastrophic' || r.severity === 'serious' ? 'problem' : r.severity === 'moderate' ? 'attention' : 'neutral'}>
                     {SEVERITY_LABEL[r.severity] ?? r.severity}
-                  </span>
+                  </Badge>
                 </div>
                 <p className="mt-2 whitespace-pre-wrap text-[0.95rem]">{r.description}</p>
                 <p className="mt-2 text-sm text-ink-soft">
@@ -51,14 +49,14 @@ export default async function IncidentsPage() {
                     was never written to the row at all, including in the audit
                     trail. Saying so here keeps anyone from going looking.
                   */}
-                  {r.anonymous ? ' · iliripotiwa bila jina (mtoa taarifa hajahifadhiwa popote)' : ''}
-                  {r.escalated_to_governance ? ' · imepandishwa kwa uongozi' : ''}
+                  {r.anonymous ? ' · anonymous report' : ''}
+                  {r.escalated_to_governance ? ' · escalated to governance' : ''}
                 </p>
               </Card>
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </PageShell>
   );
 }

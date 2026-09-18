@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <div className="flex min-h-screen bg-paper text-ink max-md:flex-col">
             <Nav />
-            <main className="min-w-0 flex-1 bg-[radial-gradient(circle_at_top_right,rgba(43,145,217,0.10),transparent_34rem)]">
+            <main className="surface-grid min-w-0 flex-1 bg-[radial-gradient(circle_at_top_right,rgba(43,145,217,0.12),transparent_34rem)]">
               {children}
             </main>
           </div>

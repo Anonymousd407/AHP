@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { serverGet } from '@/lib/serverToken';
 import type { ClinicianProfile, Page } from '@/lib/api';
-import { Card, Empty, PageHeader } from '@/components/ui';
+import { Badge, Card, Empty, PageHeader, PageShell } from '@/components/ui';
 import { VerificationActions } from '@/components/VerificationActions';
 
 export default async function VerificationPage() {
@@ -16,25 +16,25 @@ export default async function VerificationPage() {
   const items = pending?.data ?? [];
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <PageShell>
       <PageHeader
-        title="Uthibitisho wa madaktari"
-        lede="Leseni zinazosubiri uamuzi. Kuidhinisha huwezesha akaunti; kukataa huizima na kudai sababu."
+        title="Clinician verification"
+        lede="Licences waiting for an operations decision. Approval activates routing eligibility; rejection requires a reason."
       />
 
       {items.length === 0 ? (
-        <Empty>Hakuna leseni inayosubiri uamuzi.</Empty>
+        <Empty>No clinician licences are waiting for a decision.</Empty>
       ) : (
         <ul className="mt-6 flex flex-col gap-3">
           {items.map((c) => (
             <li key={c.id}>
               <Card accent="border-l-4 border-amber">
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
-                  <span className="font-medium">{c.full_name ?? 'Jina halijawekwa'}</span>
-                  <span className="text-sm text-ink-soft">{c.specialty.replace(/_/g, ' ')}</span>
+                  <span className="font-medium">{c.full_name ?? 'Name not provided'}</span>
+                  <Badge tone="attention">{c.specialty.replace(/_/g, ' ')}</Badge>
                 </div>
                 <p className="mt-1 font-mono text-sm tabular-nums text-ink-soft">
-                  Leseni: {c.license_number}
+                  Licence: {c.license_number}
                 </p>
                 <VerificationActions clinicianId={c.id} />
               </Card>
@@ -42,6 +42,6 @@ export default async function VerificationPage() {
           ))}
         </ul>
       )}
-    </div>
+    </PageShell>
   );
 }

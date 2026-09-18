@@ -3,8 +3,8 @@ import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { serverGet } from '@/lib/serverToken';
-import type { Consultation } from '@/lib/api';
-import { Notice, PageHeader } from '@/components/ui';
+import type { Consultation, Message, Page } from '@/lib/api';
+import { Badge, Card, Notice, PageHeader, PageShell } from '@/components/ui';
 import { MessageThread } from '@/components/MessageThread';
 import { OrderInvestigation } from '@/components/OrderInvestigation';
 import { ReferForOpinion } from '@/components/ReferForOpinion';
@@ -19,53 +19,58 @@ export default async function CasePage({ params }: { params: { consultation_id: 
 
   if (!c) {
     return (
-      <div className="mx-auto max-w-3xl px-6 py-8">
-        <Notice>Kesi hii haikupatikana, au si yako.</Notice>
+      <PageShell>
+        <Notice>This case was not found, or you are not assigned to it.</Notice>
         <Link href="/doctor/" className="mt-4 inline-block text-petrol underline underline-offset-4">
-          Rudi kwenye foleni
+          Back to queue
         </Link>
-      </div>
+      </PageShell>
     );
   }
 
   const s = urgencyStyle(c.urgency_level);
+  const messages = await serverGet<Page<Message>>(`/care-threads/${c.care_thread_id}/messages?limit=100`);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <PageShell>
       <Link href="/doctor/" className="text-sm text-petrol underline underline-offset-4">
-        Rudi kwenye foleni
+        Back to queue
       </Link>
 
-      <div className="mt-4">
+      <Card className="mt-4">
         <PageHeader
-          title="Kesi inayoendelea"
-          lede={c.symptom_text ?? 'Hakuna maelezo ya maandishi.'}
-          action={<span className={`text-sm font-semibold ${s.text}`}>{s.label}</span>}
+          title="Active case"
+          lede={c.symptom_text ?? 'No symptom text provided.'}
+          action={<Badge tone={c.urgency_level === 'emergency' ? 'problem' : c.urgency_level === 'urgent' ? 'attention' : 'neutral'}>{s.label}</Badge>}
         />
-      </div>
+      </Card>
 
-      <dl className="mt-4 flex flex-wrap gap-x-8 gap-y-1 text-sm text-ink-soft">
-        <div><dt className="inline">Ilianza: </dt><dd className="inline">{dateTime(c.created_at)}</dd></div>
-        <div><dt className="inline">Njia: </dt><dd className="inline">{c.channel}</dd></div>
-        <div><dt className="inline">Hali: </dt><dd className="inline">{c.status}</dd></div>
+      <dl className="mt-4 grid gap-3 text-sm text-ink-soft sm:grid-cols-3">
+        <div className="rounded-md border border-line bg-white p-3"><dt>Started</dt><dd className="font-medium text-ink">{dateTime(c.created_at)}</dd></div>
+        <div className="rounded-md border border-line bg-white p-3"><dt>Channel</dt><dd className="font-medium capitalize text-ink">{c.channel}</dd></div>
+        <div className="rounded-md border border-line bg-white p-3"><dt>Status</dt><dd className="font-medium capitalize text-ink">{c.status.replace(/_/g, ' ')}</dd></div>
       </dl>
 
-      <MessageThread careThreadId={c.care_thread_id} meId={session.user?.id ?? ''} />
+      <MessageThread
+        careThreadId={c.care_thread_id}
+        meId={session.user?.id ?? ''}
+        initialMessages={messages?.data ?? []}
+      />
 
       <div className="mt-8 flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-5">
           <Link href={`/doctor/case/${c.id}/close`}
             className="min-h-11 bg-petrol px-5 py-2.5 font-medium text-white hover:bg-petrol-lift">
-            Funga kesi
+            Close case
           </Link>
           <Link href={`/doctor/patients/${c.patient_profile_id}`}
             className="text-sm text-petrol underline underline-offset-4">
-            Rekodi ya mgonjwa
+            Patient record
           </Link>
         </div>
         <OrderInvestigation careThreadId={c.care_thread_id} consultationId={c.id} />
         <ReferForOpinion careThreadId={c.care_thread_id} />
       </div>
-    </div>
+    </PageShell>
   );
 }

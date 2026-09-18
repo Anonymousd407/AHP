@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { api, type EmergencyRequest, type Page } from '@/lib/api';
-import { Card, Empty, Loading, Notice } from './ui';
+import { Badge, Card, Empty, Loading, Notice } from './ui';
 import { STATUS_LABEL, emergencyAccent } from '@/lib/emergency';
 import { dateTime } from '@/lib/format';
 
@@ -22,7 +22,7 @@ export function EmergencyBoard() {
       setItems(res.data?.data ?? []);
       setError(null);
     } catch {
-      setError('Ubao haukuweza kupakiwa. Inajaribu tena yenyewe.');
+      setError('The emergency board could not be loaded. It will retry automatically.');
     } finally { setLoading(false); }
   }, []);
 
@@ -40,40 +40,40 @@ export function EmergencyBoard() {
 
   return (
     <div>
-      <div className="mt-6 flex gap-1 border-b border-line">
+      <div className="mt-6 flex gap-1 border-b border-line bg-paper-sunk/60 px-3 pt-3">
         <button onClick={() => setShowClosed(false)}
-          className={`min-h-11 px-4 text-[0.95rem] ${
-            !showClosed ? 'border-b-2 border-petrol font-medium text-petrol' : 'text-ink-soft hover:text-ink'
+          className={`min-h-11 rounded-t-md px-4 text-[0.95rem] ${
+            !showClosed ? 'border-b-2 border-petrol bg-white font-semibold text-petrol shadow-sm' : 'text-ink-soft hover:bg-white/70 hover:text-ink'
           }`}>
-          Zinazoendelea ({open.length})
+          Active ({open.length})
         </button>
         <button onClick={() => setShowClosed(true)}
-          className={`min-h-11 px-4 text-[0.95rem] ${
-            showClosed ? 'border-b-2 border-petrol font-medium text-petrol' : 'text-ink-soft hover:text-ink'
+          className={`min-h-11 rounded-t-md px-4 text-[0.95rem] ${
+            showClosed ? 'border-b-2 border-petrol bg-white font-semibold text-petrol shadow-sm' : 'text-ink-soft hover:bg-white/70 hover:text-ink'
           }`}>
-          Zilizofungwa ({closed.length})
+          Closed ({closed.length})
         </button>
       </div>
 
       {error && <div className="mt-4"><Notice>{error}</Notice></div>}
 
       {loading ? <Loading /> : shown.length === 0 ? (
-        <Empty>{showClosed ? 'Hakuna dharura zilizofungwa.' : 'Hakuna dharura inayoendelea.'}</Empty>
+        <Empty>{showClosed ? 'No closed emergency requests.' : 'No active emergency requests.'}</Empty>
       ) : (
         <ul className="mt-4 flex flex-col gap-3">
           {shown.map((e) => (
             <li key={e.id}>
               <Card accent={emergencyAccent(e)}>
                 <div className="flex flex-wrap items-baseline justify-between gap-3">
-                  <Link href={`/emergency/${e.id}`} className="font-medium text-petrol underline underline-offset-4">
-                    {e.scale === 'mass_casualty' ? 'Ajali kubwa' : 'Mtu mmoja'} · {e.category}
+                  <Link href={`/admin/emergency/${e.id}`} className="font-medium text-petrol underline underline-offset-4">
+                    {e.scale === 'mass_casualty' ? 'Mass casualty' : 'Individual'} · {e.category.replace(/_/g, ' ')}
                   </Link>
-                  <span className="text-sm text-ink-soft">{STATUS_LABEL[e.status]}</span>
+                  <Badge tone={OPEN.includes(e.status) ? 'attention' : 'neutral'}>{STATUS_LABEL[e.status]}</Badge>
                 </div>
                 {e.description && <p className="mt-1 text-[0.95rem]">{e.description}</p>}
                 <p className="mt-1 text-sm text-ink-soft">
                   {dateTime(e.reported_at)} · {e.source}
-                  {e.estimated_casualties ? ` · watu ${e.estimated_casualties}` : ''}
+                  {e.estimated_casualties ? ` · people ${e.estimated_casualties}` : ''}
                   {' · '}
                   <span className="font-mono tabular-nums">
                     {e.location.lat.toFixed(4)}, {e.location.lng.toFixed(4)}

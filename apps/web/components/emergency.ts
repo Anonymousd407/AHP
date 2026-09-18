@@ -27,13 +27,13 @@ export function canDispatch(status: EmergencyStatus): boolean {
 }
 
 export const STATUS_LABEL: Record<EmergencyStatus, string> = {
-  reported: 'Imeripotiwa',
-  triaged: 'Imepangwa',
-  dispatched: 'Gari limetumwa',
-  en_route: 'Njiani',
-  arrived: 'Wamefika',
-  resolved: 'Imekamilika',
-  cancelled: 'Imeghairiwa',
+  reported: 'Reported',
+  triaged: 'Triaged',
+  dispatched: 'Dispatched',
+  en_route: 'En route',
+  arrived: 'Arrived',
+  resolved: 'Resolved',
+  cancelled: 'Cancelled',
 };
 
 /**

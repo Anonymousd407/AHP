@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { serverGet } from '@/lib/serverToken';
 import type { Page, Payment } from '@/lib/api';
-import { Card, Empty, PageHeader } from '@/components/ui';
+import { Badge, Card, Empty, PageHeader, PageShell } from '@/components/ui';
 import { dateTime } from '@/lib/format';
 import { RefundPayment } from '@/components/RefundPayment';
 
@@ -15,14 +15,14 @@ export default async function PaymentsPage() {
   const items = page?.data ?? [];
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <PageShell>
       <PageHeader
-        title="Malipo"
-        lede="Malipo yaliyokamilika. Marejesho ya sehemu yanaweza kutolewa zaidi ya mara moja, mradi jumla isizidi kilicholipwa."
+        title="Payments"
+        lede="Settled local/mock payments. Partial refunds are limited by the remaining refundable balance."
       />
 
       {items.length === 0 ? (
-        <Empty>Hakuna malipo yaliyokamilika.</Empty>
+        <Empty>No settled payments are available.</Empty>
       ) : (
         <ul className="mt-6 flex flex-col gap-3">
           {items.map((p) => {
@@ -34,7 +34,7 @@ export default async function PaymentsPage() {
                     <span className="font-mono text-lg tabular-nums">
                       {p.amount.toLocaleString()} {p.currency}
                     </span>
-                    <span className="text-sm text-ink-soft">{p.status}</span>
+                    <Badge tone={p.status === 'succeeded' ? 'good' : p.status.includes('refund') ? 'attention' : 'neutral'}>{p.status.replace(/_/g, ' ')}</Badge>
                   </div>
                   <p className="mt-1 text-sm text-ink-soft">
                     {p.purpose.replace(/_/g, ' ')} · {p.method.replace(/_/g, ' ')}
@@ -47,12 +47,12 @@ export default async function PaymentsPage() {
                   */}
                   {p.provider_reference && (
                     <p className="mt-1 font-mono text-xs tabular-nums text-ink-soft">
-                      Kumbukumbu ya mtoa huduma: {p.provider_reference}
+                      Provider reference: {p.provider_reference}
                     </p>
                   )}
                   {p.refunded_amount > 0 && (
                     <p className="mt-1 text-sm text-amber">
-                      Imerejeshwa {p.refunded_amount.toLocaleString()} {p.currency} · imebaki{' '}
+                      Refunded {p.refunded_amount.toLocaleString()} {p.currency} · remaining{' '}
                       {remaining.toLocaleString()}
                     </p>
                   )}
@@ -65,6 +65,6 @@ export default async function PaymentsPage() {
           })}
         </ul>
       )}
-    </div>
+    </PageShell>
   );
 }
