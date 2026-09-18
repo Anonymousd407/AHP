@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { serverGet } from '@/lib/serverToken';
 import type { InvestigationOrder, Page } from '@/lib/api';
-import { Card, Empty, PageHeader } from '@/components/ui';
+import { Card, Empty, Notice, PageHeader } from '@/components/ui';
 import { dateTime } from '@/lib/format';
 
 export default async function DiagnosticsPage() {
@@ -21,7 +21,11 @@ export default async function DiagnosticsPage() {
         lede="Matokeo yenye thamani ya hatari yanawekwa juu. Matokeo hayahesabiwi kuwa yamepokelewa hadi uthibitishe."
       />
 
-      {orders.length === 0 ? (
+      {!page ? (
+        <div className="mt-6">
+          <Notice>Unable to load diagnostic orders.</Notice>
+        </div>
+      ) : orders.length === 0 ? (
         <Empty>Huna vipimo vilivyoombwa.</Empty>
       ) : (
         <ul className="mt-6 flex flex-col gap-3">

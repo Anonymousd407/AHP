@@ -1,4 +1,4 @@
-// File: /home/egovirdc/SOSPRO/A-health platform/Web/apps/doctor-admin/app/queue/page.tsx
+// File: /home/kali/Documents/cerficates/Projects/high_level/AHP/apps/doctor-admin/app/queue/page.tsx
 import * as entry from '../../../../app/queue/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

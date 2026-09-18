@@ -1,7 +1,3 @@
-// Loads services/auth/.env. Must be the first import: @a-health/database
-// constructs the Prisma client at import time, and the client reads
-// DATABASE_URL then — a dotenv call placed after it would run too late.
-import 'dotenv/config';
 import { randomInt } from 'node:crypto';
 import bcrypt from 'bcrypt';
 import { prisma } from '@a-health/database';

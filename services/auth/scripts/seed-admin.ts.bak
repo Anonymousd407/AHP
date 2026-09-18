@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { randomInt, randomUUID } from 'node:crypto';
 import bcrypt from 'bcrypt';
 import { prisma } from '@a-health/database';
@@ -57,29 +56,17 @@ async function wipe() {
     await prisma.user.delete({ where: { id: pending.id } }).catch(() => undefined);
   }
 
-  // The admin is deliberately not deleted. Once it has authored a triage
-  // ruleset or an audit entry, a RESTRICT foreign key refuses — and it is
-  // right to: those records name who made the decision. main() upserts it.
+  if (admin) await prisma.user.delete({ where: { id: admin.id } }).catch(() => undefined);
 }
 
 async function main() {
   await wipe();
 
-  // Upsert, so re-running refreshes the password without disturbing anything
-  // this account has already authored.
-  const adminHash = await bcrypt.hash(ADMIN_PASSWORD, 12);
-  await prisma.user.upsert({
-    where: { email: ADMIN_EMAIL },
-    update: {
-      passwordHash: adminHash,
-      role: 'platform_admin',
-      status: 'active',
-      fullName: 'Neema Kilonzo',
-    },
-    create: {
+  await prisma.user.create({
+    data: {
       phoneNumber: `+2557${randomInt(10_000_000, 99_999_999)}`,
       email: ADMIN_EMAIL,
-      passwordHash: adminHash,
+      passwordHash: await bcrypt.hash(ADMIN_PASSWORD, 12),
       role: 'platform_admin',
       status: 'active',
       fullName: 'Neema Kilonzo',

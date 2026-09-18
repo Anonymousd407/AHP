@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { randomInt, randomUUID } from 'node:crypto';
 import bcrypt from 'bcrypt';
 import { prisma } from '@a-health/database';

@@ -19,7 +19,15 @@ const users: string[] = [];
 const intentIds: string[] = [];
 
 after(async () => {
-  for (const id of intentIds) {
+  const userIntents = users.length
+    ? await prisma.paymentIntent.findMany({
+      where: { payerUserId: { in: users } },
+      select: { id: true },
+    }).catch(() => [])
+    : [];
+  const cleanupIntentIds = [...new Set([...intentIds, ...userIntents.map((i) => i.id)])];
+
+  for (const id of cleanupIntentIds) {
     const intent = await prisma.paymentIntent.findUnique({ where: { id } }).catch(() => null);
     if (intent?.paymentId) {
       await prisma.paymentRefund.deleteMany({ where: { paymentId: intent.paymentId } }).catch(() => undefined);

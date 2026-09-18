@@ -8,3 +8,36 @@ build/
 .next/
 .turbo/
 coverage/
+.playwright-browsers/
+playwright-report/
+test-results/
+*.auth-state.json
+
+# Local secrets
+.env
+.env.*
+!.env.example
+
+# Generated/build
+.next/
+**/.next/
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local runtime/testing
+.dev-logs/
+test-results/
+.playwright-browsers/
+playwright-report/
+*.auth-state.json
+
+# Private backups/dumps
+*.dump
+*.pgcustom
+*.sql
+*.tar
+*.tgz
+*.bundle
+ahp-local-backups/

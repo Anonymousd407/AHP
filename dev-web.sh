@@ -2,9 +2,10 @@
 #
 # Starts one or more web consoles together with exactly the services they need.
 #
-#   bash dev-web.sh doctor       -> clinician console  (3100)
-#   bash dev-web.sh admin        -> operations console (3200)
-#   bash dev-web.sh analytics    -> analytics portal   (3300)
+#   bash dev-web.sh web          -> unified staff app   (3000)
+#   bash dev-web.sh doctor       -> clinician fallback  (3100)
+#   bash dev-web.sh admin        -> operations fallback (3200)
+#   bash dev-web.sh analytics    -> analytics fallback  (3300)
 #   bash dev-web.sh doctor admin -> both, services shared
 #   bash dev-web.sh all          -> all three
 #
@@ -50,17 +51,18 @@ ADMIN_SVCS="auth doctor emergency payment quality devices facilities"
 ANALYTICS_SVCS="auth research surveillance"
 
 APPS=("$@")
-[ ${#APPS[@]} -eq 0 ] && APPS=(doctor)
+[ ${#APPS[@]} -eq 0 ] && APPS=(web)
 if [ "${APPS[0]}" = "all" ]; then APPS=(doctor admin analytics); fi
 
 WANTED=""
-RUN_DOCTOR=0; RUN_ADMIN=0; RUN_ANALYTICS=0
+RUN_WEB=0; RUN_DOCTOR=0; RUN_ADMIN=0; RUN_ANALYTICS=0
 for app in "${APPS[@]}"; do
   case "$app" in
+    web)       WANTED="$WANTED $DOCTOR_SVCS $ADMIN_SVCS $ANALYTICS_SVCS"; RUN_WEB=1 ;;
     doctor)    WANTED="$WANTED $DOCTOR_SVCS";    RUN_DOCTOR=1 ;;
     admin)     WANTED="$WANTED $ADMIN_SVCS";     RUN_ADMIN=1 ;;
     analytics) WANTED="$WANTED $ANALYTICS_SVCS"; RUN_ANALYTICS=1 ;;
-    *) echo "Unknown app: $app  (use doctor, admin, analytics, or all)"; exit 1 ;;
+    *) echo "Unknown app: $app  (use web, doctor, admin, analytics, or all)"; exit 1 ;;
   esac
 done
 SERVICES=$(echo "$WANTED" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ')
@@ -94,6 +96,7 @@ check_app_env() {
     exit 1
   fi
 }
+[ $RUN_WEB -eq 1 ]       && check_app_env web          "unified staff app"
 [ $RUN_DOCTOR -eq 1 ]    && check_app_env doctor-admin "clinician console"
 [ $RUN_ADMIN -eq 1 ]     && check_app_env admin        "operations console"
 [ $RUN_ANALYTICS -eq 1 ] && check_app_env analytics    "analytics portal"
@@ -146,6 +149,11 @@ echo "-------------------------------------------------------------"
 if [ $RUN_DOCTOR -eq 1 ]; then
   start_app doctor-dashboard 3100 doctor-dashboard
   echo "  Clinician    http://localhost:3100   daktari@dev.local / Daktari#2026"
+fi
+if [ $RUN_WEB -eq 1 ]; then
+  start_app a-health-web 3000 a-health-web
+  echo "  Unified      http://localhost:3000   daktari@dev.local / Daktari#2026"
+  echo "                                  or   msimamizi@dev.local / Msimamizi#2026"
 fi
 if [ $RUN_ADMIN -eq 1 ]; then
   start_app admin-console 3200 admin-console

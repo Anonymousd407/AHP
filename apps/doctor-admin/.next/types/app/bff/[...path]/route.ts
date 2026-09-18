@@ -1,4 +1,4 @@
-// File: /home/egovirdc/SOSPRO/A-health platform/Web/apps/doctor-admin/app/bff/[...path]/route.ts
+// File: /home/kali/Documents/cerficates/Projects/high_level/AHP/apps/doctor-admin/app/bff/[...path]/route.ts
 import * as entry from '../../../../../app/bff/[...path]/route.js'
 import type { NextRequest } from 'next/server.js'
 

@@ -447,6 +447,13 @@ export async function refreshSession(presented: string, meta: RequestMeta) {
   }
 
   if (record.usedAt) {
+    const ageMs = Date.now() - record.usedAt.getTime();
+    if (ageMs >= 0 && ageMs <= 10_000) {
+      throw unauthenticated(
+        'TOKEN_INVALID',
+        'Session was already refreshed. Retry with the latest session.',
+      );
+    }
     await prisma.refreshToken.updateMany({
       where: { familyId: record.familyId, revokedAt: null },
       data: { revokedAt: new Date() },

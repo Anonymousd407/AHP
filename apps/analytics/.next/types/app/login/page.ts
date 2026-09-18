@@ -1,4 +1,4 @@
-// File: /home/egovirdc/SOSPRO/A-health platform/Web/apps/analytics/app/login/page.tsx
+// File: /home/kali/Documents/cerficates/Projects/high_level/AHP/apps/analytics/app/login/page.tsx
 import * as entry from '../../../../app/login/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -15,34 +15,34 @@ export default function Login() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null); setBusy(true);
-    const res = await signIn('credentials', { email, password, redirect: false });
+    const res = await signIn('credentials', { email, password, redirect: false, callbackUrl: '/emergency' });
     if (res?.error) {
       // Does not say which of the two was wrong: confirming an email exists is
       // a free answer an attacker should not get.
-      setError('Barua pepe au nywila si sahihi.');
+      setError('Invalid email or password.');
       setBusy(false);
       return;
     }
-    router.push('/emergency');
+    router.push(res?.url ? new URL(res.url).pathname : '/emergency');
     router.refresh();
   }
 
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6 py-12">
       <h1 className="text-2xl font-semibold tracking-tight">A-health</h1>
-      <p className="mt-2 text-ink-soft">Ingia kwenye akaunti ya uendeshaji.</p>
+      <p className="mt-2 text-ink-soft">Sign in to your operations account.</p>
       <form onSubmit={submit} className="mt-8 flex flex-col gap-4">
-        <Field label="Barua pepe" htmlFor="email">
+        <Field label="Email" htmlFor="email">
           <input id="email" type="email" autoComplete="email" required
             value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
         </Field>
-        <Field label="Nywila" htmlFor="password">
+        <Field label="Password" htmlFor="password">
           <input id="password" type="password" autoComplete="current-password" required
             value={password} onChange={(e) => setPassword(e.target.value)} className={inputClass} />
         </Field>
         {error && <Notice>{error}</Notice>}
         <Button type="submit" disabled={busy} className="mt-2 w-full">
-          {busy ? 'Inaingia...' : 'Ingia'}
+          {busy ? 'Signing in...' : 'Sign in'}
         </Button>
       </form>
     </div>
